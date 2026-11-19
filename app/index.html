@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neon Sunset Cover Maker — GTA 6-style poster studio</title>
+<meta name="description" content="Turn your photo and a caption into GTA 6-style multi-panel cover art with a sunset or neon colour grade. Runs offline; your photos never leave your machine.">
+<link rel="stylesheet" href="style.css">
+<script src="src/cover.js"></script>
+<script src="src/sample.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>Neon Sunset Cover Maker</h1>
+    <p class="tagline">GTA 6-style poster studio — your photos stay on your machine.</p>
+  </div>
+  <p class="steps">1 · Add a photo &nbsp;→&nbsp; 2 · Pick a layout &nbsp;→&nbsp; 3 · Write the caption &nbsp;→&nbsp; 4 · Export PNG</p>
+</header>
+
+<main>
+  <section class="panel controls" aria-label="Cover controls">
+    <h2>1 · Photos</h2>
+    <div id="dropZone" class="dropzone" role="button" tabindex="0">
+      <strong>Drop photos here, or click to choose</strong>
+      <span>One photo can fill every panel — or several, one per panel.</span>
+      <input id="fileInput" type="file" accept="image/*" multiple hidden>
+    </div>
+    <div class="row">
+      <button id="samplePortrait" type="button">Try sample portrait</button>
+      <button id="sampleSkyline" type="button">Try sample skyline</button>
+    </div>
+    <div id="photoTray" class="tray"></div>
+    <p class="hint">Click a photo to put it in the selected panel. Photos are read on your machine and never uploaded.</p>
+
+    <h2>2 · Layout <span id="panelCount" class="count"></span></h2>
+    <div id="layoutGroup" class="btn-group"></div>
+    <div id="panelStrip" class="panel-strip"></div>
+    <div class="row wrap">
+      <label class="slider-label">Zoom <input id="zoom" type="range" min="100" max="300" value="100"> <span id="zoomLabel">100%</span></label>
+      <button id="fillAll" type="button">Fill all panels with this one</button>
+      <button id="resetCrop" type="button">Reset crop</button>
+    </div>
+    <p class="hint">Drag the preview to move the selected panel’s photo. Click a panel chip to select it.</p>
+
+    <h2>3 · Colour grade</h2>
+    <div id="gradeGroup" class="btn-group"></div>
+
+    <h2>4 · Caption</h2>
+    <label class="field">Cover caption
+      <input id="caption" type="text" value="SUNSET DRIVE" maxlength="40">
+    </label>
+    <label class="field">Sub-caption
+      <input id="subcaption" type="text" value="NEON NIGHTS • 2026" maxlength="60">
+    </label>
+    <label class="field">Caption position
+      <select id="captionPos">
+        <option value="bottom" selected>Bottom</option>
+        <option value="top">Top</option>
+      </select>
+    </label>
+
+    <h2>5 · Export</h2>
+    <div id="sizeGroup" class="btn-group"></div>
+    <button id="exportBtn" type="button" class="export">Export PNG</button>
+    <p id="status" class="status" role="status"></p>
+  </section>
+
+  <section class="panel preview-panel" aria-label="Live preview">
+    <h2>Live preview</h2>
+    <canvas id="preview" width="1920" height="1080"></canvas>
+    <p class="hint">The preview is the cover itself, drawn at the export size. Drag it to reposition the selected panel.</p>
+  </section>
+</main>
+
+<footer>
+  <p>Original design. No Rockstar Games logo, artwork, character or font is used.
+  Display lettering: Anton, SIL Open Font License 1.1 (see <a href="fonts/OFL.txt">fonts/OFL.txt</a>).
+  Sample photos are illustrations drawn by this app, not real photographs.</p>
+</footer>
+<script src="src/main.js"></script>
+</body>
+</html>
