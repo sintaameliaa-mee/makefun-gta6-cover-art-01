@@ -1,169 +1,280 @@
-// Procedural sample photos for Neon Sunset Cover Maker.
-// Both are drawn from scratch on canvas — flat illustration, no real person,
-// no borrowed artwork — so screenshots can show the app with a photo loaded.
+/**
+ * sample.js — procedurally drawn sample scenes for Neon Vice Cover Studio.
+ *
+ * No real photos ship with the app: these two scenes are painted with canvas
+ * paths alone, so the editor opens with photos loaded and the screenshots
+ * never show a real person. One is a synthwave beach at sunset, the other a
+ * neon city skyline at dusk.
+ */
 
-/** A stylised sunset portrait: skyline, sun and a person silhouette with neon rim light. */
-function drawSamplePortrait(width, height) {
+function paintSunsetSky(ctx, width, height) {
+  const sky = ctx.createLinearGradient(0, 0, 0, height * 0.62);
+  sky.addColorStop(0, '#1b0f3b');
+  sky.addColorStop(0.38, '#6d1e5e');
+  sky.addColorStop(0.62, '#e8446e');
+  sky.addColorStop(0.82, '#ff8a3d');
+  sky.addColorStop(1, '#ffd23e');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, width, height * 0.62);
+}
+
+function paintSlicedSun(ctx, cx, cy, radius) {
+  ctx.save();
+  ctx.fillStyle = '#fff3b0';
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fill();
+  // Slice the lower half with sky-coloured bars, synthwave style.
+  ctx.fillStyle = '#ff8a3d';
+  let y = cy + radius * 0.08;
+  let barH = radius * 0.045;
+  while (y < cy + radius) {
+    ctx.fillRect(cx - radius, y, radius * 2, barH);
+    y += barH * 2.6;
+    barH *= 1.35;
+  }
+  ctx.restore();
+}
+
+function paintPalm(ctx, x, y, scale, lean) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  ctx.rotate(lean);
+  ctx.strokeStyle = '#150820';
+  ctx.lineCap = 'round';
+  // Curved trunk.
+  ctx.lineWidth = 13;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.quadraticCurveTo(14, -90, -6, -190);
+  ctx.stroke();
+  // Fronds fanning from the crown.
+  ctx.lineWidth = 9;
+  const crownX = -6;
+  const crownY = -190;
+  for (let i = 0; i < 7; i += 1) {
+    const angle = Math.PI * (0.08 + (i / 6) * 0.84);
+    const len = 95 + (i % 3) * 16;
+    const tipX = crownX + Math.cos(angle) * len;
+    const tipY = crownY - Math.abs(Math.sin(angle)) * len * 0.62 + 26;
+    ctx.beginPath();
+    ctx.moveTo(crownX, crownY);
+    ctx.quadraticCurveTo(
+      crownX + Math.cos(angle) * len * 0.55,
+      crownY - Math.abs(Math.sin(angle)) * len * 0.75,
+      tipX,
+      tipY,
+    );
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function paintBirds(ctx, width, height) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(20, 8, 32, 0.85)';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  const birds = [
+    [width * 0.22, height * 0.16, 14],
+    [width * 0.3, height * 0.21, 10],
+    [width * 0.68, height * 0.13, 12],
+    [width * 0.76, height * 0.19, 9],
+  ];
+  birds.forEach(([x, y, s]) => {
+    ctx.beginPath();
+    ctx.moveTo(x - s, y);
+    ctx.quadraticCurveTo(x - s * 0.4, y - s * 0.7, x, y);
+    ctx.quadraticCurveTo(x + s * 0.4, y - s * 0.7, x + s, y);
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+/** Synthwave beach: sliced sun, ocean reflection, palm silhouettes. */
+function paintBeachScene(ctx, width, height) {
+  paintSunsetSky(ctx, width, height);
+  const horizon = height * 0.62;
+  paintSlicedSun(ctx, width * 0.5, horizon - height * 0.2, height * 0.21);
+  paintBirds(ctx, width, height);
+
+  // Ocean with a glittering sun path.
+  const sea = ctx.createLinearGradient(0, horizon, 0, height);
+  sea.addColorStop(0, '#3a1c5e');
+  sea.addColorStop(1, '#120826');
+  ctx.fillStyle = sea;
+  ctx.fillRect(0, horizon, width, height - horizon);
+  ctx.save();
+  ctx.fillStyle = 'rgba(255, 210, 62, 0.5)';
+  for (let i = 0; i < 26; i += 1) {
+    const t = i / 26;
+    const y = horizon + 6 + t * (height - horizon - 14);
+    const w = width * (0.02 + t * 0.16);
+    ctx.fillRect(width / 2 - w / 2 + (i % 2 === 0 ? 8 : -8), y, w, 2.5);
+  }
+  ctx.restore();
+
+  // Sand foreground.
+  ctx.fillStyle = '#241031';
+  ctx.beginPath();
+  ctx.moveTo(0, height);
+  ctx.lineTo(0, height * 0.86);
+  ctx.quadraticCurveTo(width * 0.5, height * 0.8, width, height * 0.88);
+  ctx.lineTo(width, height);
+  ctx.closePath();
+  ctx.fill();
+
+  paintPalm(ctx, width * 0.1, height * 0.99, height / 620, -0.1);
+  paintPalm(ctx, width * 0.9, height * 0.99, height / 720, 0.12);
+  paintPalm(ctx, width * 0.8, height * 0.94, height / 1100, -0.06);
+}
+
+function paintCitySky(ctx, width, height) {
+  const sky = ctx.createLinearGradient(0, 0, 0, height * 0.7);
+  sky.addColorStop(0, '#070716');
+  sky.addColorStop(0.55, '#1c1040');
+  sky.addColorStop(1, '#5b1e63');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, width, height * 0.7);
+
+  // Stars.
+  ctx.save();
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+  const stars = [
+    [0.08, 0.06], [0.16, 0.14], [0.27, 0.05], [0.36, 0.12], [0.47, 0.07],
+    [0.58, 0.13], [0.66, 0.05], [0.74, 0.11], [0.84, 0.06], [0.92, 0.15],
+    [0.12, 0.22], [0.44, 0.2], [0.7, 0.2], [0.88, 0.24], [0.55, 0.22],
+  ];
+  stars.forEach(([fx, fy], i) => {
+    const r = i % 3 === 0 ? 2.2 : 1.3;
+    ctx.beginPath();
+    ctx.arc(width * fx, height * fy, r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.restore();
+
+  // Crescent moon.
+  ctx.save();
+  ctx.fillStyle = '#ffe9a8';
+  ctx.beginPath();
+  ctx.arc(width * 0.82, height * 0.14, height * 0.07, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#1c1040';
+  ctx.beginPath();
+  ctx.arc(width * 0.845, height * 0.125, height * 0.06, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/** Neon city: lit skyline, glowing signs, wet-street reflections. */
+function paintCityScene(ctx, width, height) {
+  paintCitySky(ctx, width, height);
+  const ground = height * 0.78;
+
+  // Far skyline, hazy purple.
+  ctx.fillStyle = '#2a1750';
+  const far = [
+    [0.0, 0.42, 0.09], [0.08, 0.3, 0.07], [0.16, 0.48, 0.1], [0.27, 0.36, 0.08],
+    [0.36, 0.52, 0.11], [0.48, 0.34, 0.09], [0.58, 0.46, 0.08], [0.67, 0.32, 0.1],
+    [0.78, 0.5, 0.09], [0.88, 0.38, 0.12],
+  ];
+  far.forEach(([fx, fh, fw]) => {
+    ctx.fillRect(width * fx, ground - height * fh, width * fw, height * fh);
+  });
+
+  // Near towers, near-black, with lit windows.
+  const near = [
+    [0.03, 0.58, 0.12], [0.2, 0.66, 0.13], [0.4, 0.5, 0.11],
+    [0.56, 0.7, 0.12], [0.73, 0.56, 0.13], [0.9, 0.62, 0.1],
+  ];
+  near.forEach(([fx, fh, fw], bi) => {
+    const bx = width * fx;
+    const by = ground - height * fh;
+    const bw = width * fw;
+    const bh = height * fh;
+    ctx.fillStyle = '#0d0722';
+    ctx.fillRect(bx, by, bw, bh);
+    // Antenna on the tallest tower.
+    if (bi === 3) {
+      ctx.fillRect(bx + bw / 2 - 1, by - height * 0.06, 2, height * 0.06);
+      ctx.fillStyle = '#ff2e88';
+      ctx.beginPath();
+      ctx.arc(bx + bw / 2, by - height * 0.06, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Windows.
+    const cols = Math.floor(bw / 22);
+    const rows = Math.floor(bh / 26);
+    for (let r = 0; r < rows; r += 1) {
+      for (let c = 0; c < cols; c += 1) {
+        if ((r * 7 + c * 5 + bi * 3) % 4 !== 0) continue;
+        ctx.fillStyle = (r + c) % 3 === 0 ? '#ffd23e' : '#2ee6ff';
+        ctx.globalAlpha = 0.55 + ((r * 3 + c) % 3) * 0.15;
+        ctx.fillRect(bx + 8 + c * 22, by + 10 + r * 26, 10, 13);
+      }
+    }
+    ctx.globalAlpha = 1;
+  });
+
+  // Neon signs.
+  const signs = [
+    { x: 0.2, y: 0.3, w: 0.13, h: 0.045, color: '#ff2e88', text: 'VICE' },
+    { x: 0.56, y: 0.2, w: 0.12, h: 0.04, color: '#2ee6ff', text: 'NEON' },
+    { x: 0.73, y: 0.38, w: 0.1, h: 0.04, color: '#ffd23e', text: 'HOTEL' },
+  ];
+  signs.forEach(({ x, y, w, h, color }) => {
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = color;
+    ctx.fillRect(width * x, height * y, width * w, height * h);
+    ctx.restore();
+  });
+
+  // Wet street with vertical light streaks.
+  const street = ctx.createLinearGradient(0, ground, 0, height);
+  street.addColorStop(0, '#160b30');
+  street.addColorStop(1, '#05030d');
+  ctx.fillStyle = street;
+  ctx.fillRect(0, ground, width, height - ground);
+  ctx.save();
+  const streaks = [
+    [0.14, '#ff2e88'], [0.26, '#ffd23e'], [0.45, '#2ee6ff'],
+    [0.62, '#ff2e88'], [0.78, '#ffd23e'], [0.9, '#2ee6ff'],
+  ];
+  streaks.forEach(([fx, color]) => {
+    const grad = ctx.createLinearGradient(0, ground, 0, height);
+    grad.addColorStop(0, color);
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.globalAlpha = 0.4;
+    ctx.fillStyle = grad;
+    ctx.fillRect(width * fx, ground, width * 0.02, height - ground);
+  });
+  ctx.restore();
+}
+
+/**
+ * Paint one sample scene onto a fresh canvas.
+ * variant: 'beach' | 'city'.
+ */
+export function makeSampleScene(variant, width = 1200, height = 900) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
-  // Sunset sky.
-  const sky = ctx.createLinearGradient(0, 0, 0, height);
-  sky.addColorStop(0, '#1b0b3b');
-  sky.addColorStop(0.45, '#7b2d8b');
-  sky.addColorStop(0.72, '#ff5e62');
-  sky.addColorStop(1, '#ffb347');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, width, height);
-  // Sun with glow.
-  const sx = width * 0.68;
-  const sy = height * 0.34;
-  const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, width * 0.5);
-  glow.addColorStop(0, 'rgba(255,214,120,0.95)');
-  glow.addColorStop(0.25, 'rgba(255,170,90,0.55)');
-  glow.addColorStop(1, 'rgba(255,170,90,0)');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = '#ffe9a8';
-  ctx.beginPath();
-  ctx.arc(sx, sy, width * 0.13, 0, Math.PI * 2);
-  ctx.fill();
-  // Distant skyline.
-  ctx.fillStyle = 'rgba(43,16,85,0.75)';
-  const tops = [0.62, 0.55, 0.66, 0.58, 0.64, 0.52, 0.68, 0.6, 0.63, 0.56];
-  let x = 0;
-  const step = width / tops.length;
-  ctx.beginPath();
-  ctx.moveTo(0, height * 0.78);
-  tops.forEach((t, i) => {
-    ctx.lineTo(x, height * t);
-    ctx.lineTo(x + step * 0.7, height * t);
-    ctx.lineTo(x + step * 0.7, height * 0.78);
-    x += step;
-  });
-  ctx.lineTo(width, height * 0.78);
-  ctx.lineTo(width, height);
-  ctx.lineTo(0, height);
-  ctx.closePath();
-  ctx.fill();
-  // Ocean strip with sun reflection.
-  const sea = ctx.createLinearGradient(0, height * 0.78, 0, height);
-  sea.addColorStop(0, '#ff8c42');
-  sea.addColorStop(1, '#2b1055');
-  ctx.fillStyle = sea;
-  ctx.fillRect(0, height * 0.78, width, height * 0.22);
-  ctx.fillStyle = 'rgba(255,233,168,0.5)';
-  for (let i = 0; i < 9; i++) {
-    const rw = width * (0.05 + i * 0.012);
-    ctx.fillRect(sx - rw / 2, height * (0.8 + i * 0.022), rw, 3);
+  if (variant === 'city') {
+    paintCityScene(ctx, width, height);
+  } else {
+    paintBeachScene(ctx, width, height);
   }
-  // Person silhouette: head, hair, shoulders.
-  const cx = width * 0.38;
-  const cy = height * 0.52;
-  const headR = width * 0.11;
-  ctx.fillStyle = '#14082b';
-  ctx.beginPath();
-  ctx.arc(cx, cy, headR, 0, Math.PI * 2);
-  ctx.fill();
-  // Hair sweep.
-  ctx.beginPath();
-  ctx.moveTo(cx - headR * 1.05, cy - headR * 0.2);
-  ctx.quadraticCurveTo(cx - headR * 0.4, cy - headR * 1.7, cx + headR * 0.7, cy - headR * 1.05);
-  ctx.quadraticCurveTo(cx + headR * 1.15, cy - headR * 0.1, cx + headR * 0.9, cy + headR * 0.35);
-  ctx.quadraticCurveTo(cx + headR * 0.4, cy - headR * 0.35, cx - headR * 0.35, cy - headR * 0.25);
-  ctx.closePath();
-  ctx.fill();
-  // Neck and shoulders.
-  ctx.beginPath();
-  ctx.moveTo(cx - headR * 0.45, cy + headR * 0.8);
-  ctx.quadraticCurveTo(cx - headR * 0.4, cy + headR * 1.5, cx - headR * 2.1, height);
-  ctx.lineTo(cx + headR * 2.1, height);
-  ctx.quadraticCurveTo(cx + headR * 0.4, cy + headR * 1.5, cx + headR * 0.45, cy + headR * 0.8);
-  ctx.closePath();
-  ctx.fill();
-  // Neon rim light on the sun side.
-  ctx.strokeStyle = 'rgba(255,214,120,0.95)';
-  ctx.lineWidth = Math.max(3, width * 0.008);
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.arc(cx, cy, headR, -Math.PI * 0.45, Math.PI * 0.32);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(cx + headR * 0.45, cy + headR * 0.85);
-  ctx.quadraticCurveTo(cx + headR * 0.5, cy + headR * 1.5, cx + headR * 1.9, height * 0.995);
-  ctx.stroke();
-  // Jacket collar accent.
-  ctx.strokeStyle = '#ff2e88';
-  ctx.lineWidth = Math.max(4, width * 0.01);
-  ctx.beginPath();
-  ctx.moveTo(cx - headR * 0.7, height * 0.92);
-  ctx.lineTo(cx, height * 0.82);
-  ctx.lineTo(cx + headR * 0.7, height * 0.92);
-  ctx.stroke();
   return canvas;
 }
 
-/** A neon boulevard skyline: towers, palm silhouettes and a gradient dusk sky. */
-function drawSampleSkyline(width, height) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  const sky = ctx.createLinearGradient(0, 0, 0, height);
-  sky.addColorStop(0, '#0f0524');
-  sky.addColorStop(0.5, '#4c1d95');
-  sky.addColorStop(0.8, '#db2777');
-  sky.addColorStop(1, '#fb923c');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, width, height);
-  // Stars.
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  const stars = [[0.12, 0.1], [0.3, 0.06], [0.52, 0.14], [0.7, 0.07], [0.88, 0.16], [0.2, 0.22], [0.62, 0.26], [0.94, 0.05]];
-  stars.forEach(([fx, fy]) => {
-    ctx.beginPath();
-    ctx.arc(width * fx, height * fy, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  // Moon.
-  ctx.fillStyle = '#fef3c7';
-  ctx.beginPath();
-  ctx.arc(width * 0.82, height * 0.18, width * 0.06, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = 'rgba(254,243,199,0.25)';
-  ctx.beginPath();
-  ctx.arc(width * 0.82, height * 0.18, width * 0.1, 0, Math.PI * 2);
-  ctx.fill();
-  // Towers with lit windows.
-  const towers = [
-    [0.02, 0.55, 0.1, 0.45], [0.14, 0.42, 0.12, 0.58], [0.28, 0.5, 0.09, 0.5],
-    [0.39, 0.36, 0.13, 0.64], [0.54, 0.48, 0.1, 0.52], [0.66, 0.4, 0.12, 0.6],
-    [0.8, 0.54, 0.09, 0.46], [0.91, 0.46, 0.09, 0.54],
+/** Both sample scenes, ready to load into the editor's photo strip. */
+export function sampleScenes() {
+  return [
+    { canvas: makeSampleScene('beach'), label: 'Sunset Beach (sample)' },
+    { canvas: makeSampleScene('city'), label: 'Neon City (sample)' },
   ];
-  towers.forEach(([fx, fy, fw, fh], ti) => {
-    ctx.fillStyle = '#150829';
-    ctx.fillRect(width * fx, height * fy, width * fw, height * fh);
-    ctx.fillStyle = 'rgba(255,209,102,0.9)';
-    for (let r = 0; r < 6; r++) {
-      for (let c = 0; c < 3; c++) {
-        if ((r * 3 + c + ti) % 3 === 0) continue;
-        ctx.fillRect(width * (fx + 0.015 + c * fw * 0.3), height * (fy + 0.04 + r * fh * 0.14), width * 0.014, height * 0.02);
-      }
-    }
-  });
-  // Wet boulevard reflection.
-  const road = ctx.createLinearGradient(0, height * 0.86, 0, height);
-  road.addColorStop(0, '#3b0764');
-  road.addColorStop(1, '#12041f');
-  ctx.fillStyle = road;
-  ctx.fillRect(0, height * 0.86, width, height * 0.14);
-  ctx.strokeStyle = 'rgba(255,209,102,0.8)';
-  ctx.lineWidth = 3;
-  ctx.setLineDash([26, 22]);
-  ctx.beginPath();
-  ctx.moveTo(0, height * 0.93);
-  ctx.lineTo(width, height * 0.93);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  return canvas;
 }
